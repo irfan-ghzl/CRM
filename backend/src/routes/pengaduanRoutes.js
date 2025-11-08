@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 const pengaduanController = require('../controllers/pengaduanController');
 const { authMiddleware, roleMiddleware } = require('../middleware/auth');
+const { apiLimiter, createLimiter } = require('../middleware/rateLimiter');
 
-router.use(authMiddleware);
+router.use(apiLimiter, authMiddleware);
 
-router.post('/', pengaduanController.createPengaduan);
+router.post('/', createLimiter, pengaduanController.createPengaduan);
 router.get('/', pengaduanController.getPengaduan);
 router.get('/statistics', roleMiddleware('admin', 'petugas'), pengaduanController.getStatistics);
 router.get('/:id', pengaduanController.getPengaduanById);
