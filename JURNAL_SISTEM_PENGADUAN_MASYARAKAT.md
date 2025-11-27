@@ -169,17 +169,9 @@ Arsitektur sistem menggunakan pola client-server dengan pemisahan antara fronten
 
 ## 4. PERANCANGAN SISTEM
 
-Bagian ini menjelaskan perancangan sistem menggunakan diagram-diagram UML (Unified Modeling Language) yang menggambarkan berbagai aspek sistem dari sudut pandang yang berbeda. Perancangan sistem meliputi Use Case Diagram untuk menggambarkan fungsionalitas sistem, Activity Diagram untuk alur proses, Sequence Diagram untuk interaksi antar komponen, Class Diagram untuk struktur data, dan Entity Relationship Diagram untuk desain database.
-
 ### 4.1 Use Case Diagram
 
-Use Case Diagram merupakan diagram yang menggambarkan interaksi antara aktor (pengguna) dengan sistem. Diagram ini menunjukkan fungsionalitas apa saja yang dapat dilakukan oleh setiap aktor dalam sistem. Dalam Sistem Pengaduan Masyarakat ini, terdapat tiga aktor utama dengan peran dan hak akses yang berbeda:
-
-1. **Masyarakat** - Pengguna umum yang dapat mendaftar, membuat pengaduan, dan memantau status pengaduan mereka.
-2. **Petugas** - Aparatur pemerintah yang bertugas menangani dan merespons pengaduan dari masyarakat.
-3. **Admin** - Pengelola sistem yang memiliki akses penuh untuk mengelola pengguna, kategori, dan seluruh pengaduan.
-
-Berikut adalah Use Case Diagram yang menggambarkan interaksi ketiga aktor dengan sistem:
+Use Case Diagram menggambarkan interaksi antara aktor dengan sistem. Terdapat tiga aktor utama dalam sistem: Masyarakat, Petugas, dan Admin.
 
 ```mermaid
 graph TB
@@ -221,13 +213,9 @@ graph TB
     Admin --> UC7
 ```
 
-**Gambar 4.1 Use Case Diagram Sistem Pengaduan Masyarakat**
-
-Dari diagram di atas, dapat dilihat bahwa masyarakat memiliki akses untuk melakukan registrasi, login, dan mengelola pengaduan mereka sendiri. Petugas dapat login dan menangani pengaduan yang di-assign kepadanya. Sedangkan admin memiliki akses penuh terhadap seluruh fungsi manajemen sistem.
-
 ### 4.2 Activity Diagram
 
-Activity Diagram menggambarkan alur kerja (workflow) dari suatu proses bisnis dalam sistem. Diagram ini menunjukkan urutan aktivitas yang terjadi dari awal hingga akhir proses, termasuk kondisi percabangan dan keputusan yang mungkin terjadi. Dalam konteks Sistem Pengaduan Masyarakat, Activity Diagram di bawah ini menggambarkan alur lengkap proses pengaduan mulai dari registrasi pengguna hingga penyelesaian pengaduan.
+Activity Diagram menggambarkan alur proses pengaduan dalam sistem dari registrasi hingga penyelesaian pengaduan.
 
 ```mermaid
 flowchart TD
@@ -271,13 +259,9 @@ flowchart TD
     Rating --> End
 ```
 
-**Gambar 4.2 Activity Diagram Proses Pengaduan Masyarakat**
-
-Diagram di atas menunjukkan bahwa proses dimulai dari pengguna yang harus login terlebih dahulu. Jika belum memiliki akun, pengguna harus melakukan registrasi. Setelah berhasil login, masyarakat dapat membuat pengaduan dengan mengisi form dan mengunggah bukti pendukung. Pengaduan kemudian di-assign ke petugas untuk ditinjau dan diproses. Proses berakhir ketika masyarakat memberikan rating atas penanganan pengaduan.
-
 ### 4.3 Sequence Diagram
 
-Sequence Diagram adalah diagram yang menggambarkan interaksi antar objek dalam sistem berdasarkan urutan waktu. Diagram ini sangat berguna untuk memahami bagaimana komponen-komponen sistem berkomunikasi satu sama lain dalam menyelesaikan suatu proses. Sequence Diagram berikut menunjukkan interaksi detail antara Masyarakat, User Interface, Authentication Service, API Server, Database, Notification Service, dan Petugas dalam proses pembuatan dan penanganan pengaduan.
+Sequence Diagram menunjukkan interaksi antar komponen sistem dalam urutan waktu untuk proses pembuatan dan penanganan pengaduan.
 
 ```mermaid
 sequenceDiagram
@@ -340,21 +324,9 @@ sequenceDiagram
     UI-->>P: Konfirmasi tanggapan
 ```
 
-**Gambar 4.3 Sequence Diagram Proses Pengaduan**
-
-Sequence Diagram di atas menggambarkan alur komunikasi yang terjadi saat masyarakat membuat pengaduan dan petugas menanganinya. Setiap panah menunjukkan pesan atau request yang dikirim dari satu komponen ke komponen lainnya, dengan urutan dari atas ke bawah mengikuti kronologi waktu. Garis putus-putus menunjukkan response atau balasan dari komponen tujuan.
-
 ### 4.4 Class Diagram
 
-Class Diagram adalah diagram yang menggambarkan struktur statis dari sistem dengan menunjukkan kelas-kelas yang ada beserta atribut, method, dan relasi antar kelas. Diagram ini merupakan dasar untuk implementasi object-oriented programming pada sistem. Dalam Sistem Pengaduan Masyarakat, terdapat beberapa kelas utama yang saling berhubungan:
-
-1. **User** - Kelas induk yang merepresentasikan pengguna sistem dengan subclass Masyarakat, Petugas, dan Admin.
-2. **Pengaduan** - Kelas inti yang merepresentasikan data pengaduan dari masyarakat.
-3. **Kategori** - Kelas untuk mengkategorikan jenis pengaduan.
-4. **Tanggapan** - Kelas untuk menyimpan respons petugas terhadap pengaduan.
-5. **Kelas Pendukung** - FileBukti, Rating, Notifikasi, dan StatusHistory.
-
-Berikut adalah Class Diagram lengkap dari sistem:
+Class Diagram menggambarkan struktur data dan relasi antar kelas dalam sistem.
 
 ```mermaid
 classDiagram
@@ -504,22 +476,9 @@ classDiagram
     Petugas "1" --> "*" Tanggapan : membuat
 ```
 
-**Gambar 4.4 Class Diagram Sistem Pengaduan Masyarakat**
-
-Class Diagram di atas menunjukkan hierarki inheritance dimana kelas Masyarakat, Petugas, dan Admin mewarisi atribut dan method dari kelas User. Relasi antar kelas ditunjukkan dengan garis yang menghubungkan kelas-kelas tersebut, dengan kardinalitas yang menunjukkan jumlah instance yang dapat berelasi (misalnya, satu masyarakat dapat membuat banyak pengaduan).
-
 ### 4.5 Entity Relationship Diagram (ERD)
 
-Entity Relationship Diagram (ERD) adalah diagram yang menggambarkan struktur database dengan menunjukkan entitas (tabel), atribut (kolom), dan relasi antar entitas. ERD menjadi acuan dalam pembuatan skema database PostgreSQL. Berikut adalah ERD yang menggambarkan struktur database Sistem Pengaduan Masyarakat dengan delapan tabel utama:
-
-1. **USERS** - Menyimpan data semua pengguna sistem
-2. **PENGADUAN** - Menyimpan data pengaduan dari masyarakat
-3. **KATEGORI** - Menyimpan kategori jenis pengaduan
-4. **FILE_BUKTI** - Menyimpan file bukti pendukung pengaduan
-5. **TANGGAPAN** - Menyimpan tanggapan petugas
-6. **RATING** - Menyimpan penilaian masyarakat
-7. **NOTIFIKASI** - Menyimpan notifikasi untuk pengguna
-8. **STATUS_HISTORY** - Menyimpan riwayat perubahan status
+Entity Relationship Diagram menggambarkan struktur database dan relasi antar tabel.
 
 ```mermaid
 erDiagram
@@ -616,17 +575,6 @@ erDiagram
         datetime changed_at
     }
 ```
-
-**Gambar 4.5 Entity Relationship Diagram Database Sistem**
-
-ERD di atas menunjukkan relasi antar tabel dalam database. Notasi yang digunakan adalah crow's foot notation dimana:
-- `||` menunjukkan satu dan hanya satu (one and only one)
-- `|o` menunjukkan nol atau satu (zero or one)
-- `o{` menunjukkan nol atau banyak (zero or many)
-- `PK` adalah Primary Key dan `FK` adalah Foreign Key
-- `UK` adalah Unique Key
-
-Dengan perancangan database ini, sistem dapat menyimpan dan mengelola data pengaduan secara terstruktur dengan integritas data yang terjamin melalui foreign key constraints.
 
 ---
 
