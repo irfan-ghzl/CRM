@@ -176,25 +176,76 @@ Sistem menggunakan PostgreSQL dengan tabel-tabel berikut:
 
 ## 🌐 Staging Deployment
 
+### Frontend (GitHub Pages)
 Aplikasi frontend secara otomatis di-deploy ke GitHub Pages sebagai staging environment ketika ada push ke branch `main`.
 
-### URL Staging:
-- Frontend: https://irfan-ghzl.github.io/CRM
+- **URL Staging**: https://irfan-ghzl.github.io/CRM
+- **Workflow**: `.github/workflows/staging-deploy.yml`
 
-### Cara Deploy Manual:
-1. Push perubahan ke branch `main`
-2. GitHub Actions akan otomatis build dan deploy
-3. Lihat status deployment di tab "Actions" di GitHub
-
-### Konfigurasi:
-- File workflow: `.github/workflows/staging-deploy.yml`
-- Environment variables:
-  - `STAGING_API_URL`: URL backend API untuk staging (konfigurasi di Settings > Secrets and variables > Actions > Variables)
-
-### Setup GitHub Pages:
+#### Setup GitHub Pages:
 1. Buka Settings repository > Pages
 2. Pilih "GitHub Actions" sebagai source
-3. Workflow akan otomatis deploy saat ada push ke main
+
+### Backend & Database (Docker)
+Backend dan database menggunakan Docker images yang otomatis di-build dan push ke GitHub Container Registry (GHCR).
+
+#### Docker Images:
+- **Backend**: `ghcr.io/irfan-ghzl/crm/backend:latest`
+- **Frontend**: `ghcr.io/irfan-ghzl/crm/frontend:latest`
+
+#### Deploy ke Server Staging:
+
+1. **Login ke GHCR** (di server staging):
+```bash
+# Ganti YOUR_GITHUB_USERNAME dengan username GitHub Anda
+echo $GITHUB_TOKEN | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
+```
+
+2. **Pull images terbaru**:
+```bash
+docker pull ghcr.io/irfan-ghzl/crm/backend:latest
+docker pull ghcr.io/irfan-ghzl/crm/frontend:latest
+```
+
+3. **Jalankan dengan Docker Compose** (gunakan file docker-compose.yml):
+```bash
+docker-compose up -d
+```
+
+#### Deploy ke Cloud Platform:
+Docker images dapat di-deploy ke berbagai platform:
+- **Railway.app**: Import langsung dari GitHub
+- **Render.com**: Connect GitHub repository
+- **DigitalOcean App Platform**: Deploy dari container registry
+- **AWS ECS/Fargate**: Push ke ECR atau gunakan GHCR
+- **Google Cloud Run**: Deploy container image
+
+#### Konfigurasi Environment Variables:
+Untuk staging/production, set environment variables berikut di server:
+
+**Backend**:
+```env
+NODE_ENV=production
+DB_HOST=your-postgres-host
+DB_PORT=5432
+DB_NAME=crm_db
+DB_USER=your-db-user
+# Gunakan password yang kuat (min 16 karakter, kombinasi huruf, angka, simbol)
+DB_PASSWORD=your-secure-password-here
+# Generate JWT secret dengan: openssl rand -base64 32
+JWT_SECRET=your-generated-jwt-secret
+JWT_EXPIRES_IN=7d
+PORT=5000
+```
+
+**Frontend**:
+```env
+REACT_APP_API_URL=https://your-backend-url/api
+```
+
+### GitHub Actions Variables:
+Konfigurasi di Settings > Secrets and variables > Actions:
+- `STAGING_API_URL`: URL backend API untuk frontend staging
 
 ## 🔒 Security
 
