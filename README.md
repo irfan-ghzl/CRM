@@ -174,6 +174,28 @@ Sistem menggunakan PostgreSQL dengan tabel-tabel berikut:
 3. **Sequence Diagram** - Interaksi antar komponen sistem
 4. **Class Diagram** - Struktur data dan relasi antar kelas
 
+## 🌐 Staging Deployment
+
+Aplikasi frontend secara otomatis di-deploy ke GitHub Pages sebagai staging environment ketika ada push ke branch `main`.
+
+### URL Staging:
+- Frontend: https://irfan-ghzl.github.io/CRM
+
+### Cara Deploy Manual:
+1. Push perubahan ke branch `main`
+2. GitHub Actions akan otomatis build dan deploy
+3. Lihat status deployment di tab "Actions" di GitHub
+
+### Konfigurasi:
+- File workflow: `.github/workflows/staging-deploy.yml`
+- Environment variables:
+  - `STAGING_API_URL`: URL backend API untuk staging (konfigurasi di Settings > Secrets and variables > Actions > Variables)
+
+### Setup GitHub Pages:
+1. Buka Settings repository > Pages
+2. Pilih "GitHub Actions" sebagai source
+3. Workflow akan otomatis deploy saat ada push ke main
+
 ## 🔒 Security
 
 - Password di-hash menggunakan bcryptjs
