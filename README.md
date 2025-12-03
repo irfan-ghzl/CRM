@@ -201,24 +201,56 @@ Backend dan database menggunakan Docker images yang otomatis di-build dan push k
 echo $GITHUB_TOKEN | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
 ```
 
-2. **Pull images terbaru**:
+2. **Setup environment variables**:
 ```bash
-docker pull ghcr.io/irfan-ghzl/crm/backend:latest
-docker pull ghcr.io/irfan-ghzl/crm/frontend:latest
+# Copy file template
+cp .env.staging.example .env.staging
+
+# Edit dengan nilai yang sesuai
+nano .env.staging
 ```
 
-3. **Jalankan dengan Docker Compose** (gunakan file docker-compose.yml):
+3. **Jalankan dengan Docker Compose Staging**:
 ```bash
-docker-compose up -d
+docker-compose -f docker-compose.staging.yml --env-file .env.staging up -d
+```
+
+#### Koneksi Database di Staging:
+
+**Opsi 1: Database di Docker (Sudah termasuk)**
+- Database PostgreSQL sudah termasuk dalam `docker-compose.staging.yml`
+- Backend otomatis konek ke database via Docker network
+- Data disimpan di volume `postgres_staging_data`
+
+**Opsi 2: External Database (Railway, Supabase, Neon, dll)**
+1. Buat database di platform pilihan Anda
+2. Dapatkan connection string/credentials
+3. Update `.env.staging`:
+```env
+DB_HOST=your-external-db-host.railway.app
+DB_PORT=5432
+DB_NAME=crm_db
+DB_USER=your-db-user
+DB_PASSWORD=your-db-password
+```
+4. Comment/hapus service `postgres` di `docker-compose.staging.yml`
+
+**Koneksi Database Manual (untuk debugging)**:
+```bash
+# Via Docker
+docker exec -it crm-postgres-staging psql -U postgres -d crm_db
+
+# Via psql (jika terinstall) - port 15432 untuk staging
+psql -h localhost -p 15432 -U postgres -d crm_db
 ```
 
 #### Deploy ke Cloud Platform:
 Docker images dapat di-deploy ke berbagai platform:
-- **Railway.app**: Import langsung dari GitHub
-- **Render.com**: Connect GitHub repository
+- **Railway.app**: Import langsung dari GitHub (termasuk PostgreSQL gratis)
+- **Render.com**: Connect GitHub repository + PostgreSQL add-on
 - **DigitalOcean App Platform**: Deploy dari container registry
 - **AWS ECS/Fargate**: Push ke ECR atau gunakan GHCR
-- **Google Cloud Run**: Deploy container image
+- **Google Cloud Run**: Deploy container image + Cloud SQL
 
 #### Konfigurasi Environment Variables:
 Untuk staging/production, set environment variables berikut di server:
