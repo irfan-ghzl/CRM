@@ -117,8 +117,19 @@ const createUser = async (req, res) => {
     }
     
     // Validate password strength
-    if (password.length < 6) {
-      return res.status(400).json({ message: 'Password minimal 6 karakter' });
+    if (password.length < 8) {
+      return res.status(400).json({ message: 'Password minimal 8 karakter' });
+    }
+    
+    // Check for password complexity (at least one uppercase, one lowercase, one number)
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    
+    if (!hasUpperCase || !hasLowerCase || !hasNumber) {
+      return res.status(400).json({ 
+        message: 'Password harus mengandung minimal 1 huruf besar, 1 huruf kecil, dan 1 angka' 
+      });
     }
     
     // Validate username (alphanumeric and underscore only)
@@ -180,7 +191,7 @@ const updateUser = async (req, res) => {
     
     // Validate ID is a positive integer
     const userId = parseInt(id, 10);
-    if (isNaN(userId) || userId <= 0) {
+    if (!Number.isInteger(userId) || userId < 1) {
       return res.status(400).json({ message: 'ID user tidak valid' });
     }
     
@@ -242,12 +253,18 @@ const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
     
+    // Validate ID is a positive integer
+    const userId = parseInt(id, 10);
+    if (!Number.isInteger(userId) || userId < 1) {
+      return res.status(400).json({ message: 'ID user tidak valid' });
+    }
+    
     // Prevent deleting own account
-    if (parseInt(id) === req.user.id) {
+    if (userId === req.user.id) {
       return res.status(400).json({ message: 'Tidak dapat menghapus akun sendiri' });
     }
     
-    const result = await db.query('DELETE FROM users WHERE id = $1 RETURNING id', [id]);
+    const result = await db.query('DELETE FROM users WHERE id = $1 RETURNING id', [userId]);
     
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'User tidak ditemukan' });
@@ -266,8 +283,26 @@ const changePassword = async (req, res) => {
     const { id } = req.params;
     const { password } = req.body;
     
-    if (!password || password.length < 6) {
-      return res.status(400).json({ message: 'Password minimal 6 karakter' });
+    // Validate ID is a positive integer
+    const userId = parseInt(id, 10);
+    if (!Number.isInteger(userId) || userId < 1) {
+      return res.status(400).json({ message: 'ID user tidak valid' });
+    }
+    
+    // Validate password strength
+    if (!password || password.length < 8) {
+      return res.status(400).json({ message: 'Password minimal 8 karakter' });
+    }
+    
+    // Check for password complexity (at least one uppercase, one lowercase, one number)
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    
+    if (!hasUpperCase || !hasLowerCase || !hasNumber) {
+      return res.status(400).json({ 
+        message: 'Password harus mengandung minimal 1 huruf besar, 1 huruf kecil, dan 1 angka' 
+      });
     }
     
     // Hash password
@@ -275,7 +310,7 @@ const changePassword = async (req, res) => {
     
     const result = await db.query(
       'UPDATE users SET password = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING id',
-      [hashedPassword, id]
+      [hashedPassword, userId]
     );
     
     if (result.rows.length === 0) {

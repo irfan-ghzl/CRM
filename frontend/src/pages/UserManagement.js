@@ -93,7 +93,7 @@ function UserManagement() {
 
     try {
       if (editingUser) {
-        // Update user - exclude username and password if empty
+        // Update user - exclude username (disabled field) and empty password
         const { username, password, ...updateData } = formData;
         if (password) {
           updateData.password = password;
@@ -296,8 +296,14 @@ function UserManagement() {
                   value={formData.password}
                   onChange={handleChange}
                   required={!editingUser}
-                  minLength="6"
+                  minLength="8"
+                  placeholder="Minimal 8 karakter: huruf besar, kecil, dan angka"
                 />
+                {!editingUser && (
+                  <small style={{ color: '#666', fontSize: '12px' }}>
+                    Password harus minimal 8 karakter dan mengandung huruf besar, huruf kecil, dan angka
+                  </small>
+                )}
               </div>
 
               <div className="form-group">
