@@ -160,6 +160,56 @@ Setelah migrasi, gunakan akun berikut untuk login sebagai admin:
 
 ⚠️ **Penting**: Ganti password default setelah login pertama!
 
+## 👥 Membuat dan Login sebagai Petugas
+
+### Cara Membuat Akun Petugas:
+
+1. **Login sebagai Admin** menggunakan kredensial default di atas
+2. **Klik menu "Kelola User"** di navbar (hanya muncul untuk admin)
+3. **Klik tombol "Tambah User Baru"**
+4. **Isi form dengan data petugas:**
+   - Username: contoh `petugas1`
+   - Email: contoh `petugas1@crm.com`
+   - Password: minimal 8 karakter (huruf besar, kecil, angka), contoh `Petugas123`
+   - Nama Lengkap: contoh `Petugas Infrastruktur`
+   - **Role: pilih "Petugas"** (penting!)
+   - NIP: contoh `198901012020011001`
+   - Divisi: contoh `Infrastruktur`
+   - No. Telepon & Alamat (opsional)
+5. **Klik "Tambah"** untuk membuat user petugas
+
+### Cara Login sebagai Petugas:
+
+1. **Logout** dari akun admin (klik tombol Logout di navbar)
+2. Di halaman login, masukkan:
+   - Username: `petugas1` (atau username yang dibuat)
+   - Password: `Petugas123` (atau password yang dibuat)
+3. **Klik "Login"**
+
+### Cara Mengetahui Login sebagai Petugas:
+
+Setelah login berhasil, Anda akan melihat beberapa indikator bahwa Anda login sebagai petugas:
+
+1. **Di Navbar (pojok kanan atas):**
+   - Akan tertulis: `[Nama Lengkap] (petugas)`
+   - Contoh: `Petugas Infrastruktur (petugas)`
+
+2. **Menu yang tersedia:**
+   - ✅ Dashboard - menampilkan statistik pengaduan
+   - ✅ Pengaduan - melihat pengaduan yang di-assign ke petugas
+   - ❌ Buat Pengaduan - TIDAK ada (hanya untuk masyarakat)
+   - ❌ Kelola User - TIDAK ada (hanya untuk admin)
+
+3. **Di Dashboard:**
+   - Menampilkan statistik total pengaduan dan status
+   - Menampilkan pengaduan terbaru yang perlu ditangani
+
+4. **Fitur yang tersedia untuk Petugas:**
+   - Review dan validasi pengaduan
+   - Update status pengaduan (pending → diproses → selesai/ditolak)
+   - Membuat tanggapan untuk pengaduan
+   - Melihat pengaduan yang di-assign kepada petugas tersebut
+
 ## 📊 Database Schema
 
 Sistem menggunakan PostgreSQL dengan tabel-tabel berikut:
