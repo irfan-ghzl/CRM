@@ -151,18 +151,43 @@ npm start
 - `PUT /api/notifikasi/:id/read` - Mark as read
 - `PUT /api/notifikasi/read-all` - Mark all as read
 
-## 👤 Default Admin Account
+## 👤 Default Accounts
 
-Setelah migrasi, gunakan akun berikut untuk login sebagai admin:
+Setelah migrasi, gunakan akun berikut untuk login:
 
+### Admin Account
 - Username: `admin`
 - Password: `admin123`
+
+### Petugas Accounts (untuk testing)
+**Petugas 1 - Infrastruktur:**
+- Username: `petugas1`
+- Password: `Petugas123`
+- Divisi: Infrastruktur
+- NIP: 198901012020011001
+
+**Petugas 2 - Kebersihan:**
+- Username: `petugas2`
+- Password: `Petugas123`
+- Divisi: Kebersihan
+- NIP: 198902022020022002
 
 ⚠️ **Penting**: Ganti password default setelah login pertama!
 
 ## 👥 Membuat dan Login sebagai Petugas
 
-### Cara Membuat Akun Petugas:
+### Login dengan Akun Petugas yang Sudah Ada:
+
+Sistem sudah menyediakan 2 akun petugas untuk testing (lihat bagian "Default Accounts" di atas):
+- `petugas1` (Divisi Infrastruktur) - Password: `Petugas123`
+- `petugas2` (Divisi Kebersihan) - Password: `Petugas123`
+
+Untuk login:
+1. Buka halaman login
+2. Masukkan username dan password di atas
+3. Klik "Login"
+
+### Cara Membuat Akun Petugas Baru:
 
 1. **Login sebagai Admin** menggunakan kredensial default di atas
 2. **Klik menu "Kelola User"** di navbar (hanya muncul untuk admin)

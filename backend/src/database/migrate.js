@@ -138,12 +138,21 @@ const seedData = async () => {
     
     if (adminCheck.rows.length === 0) {
       const bcrypt = require('bcryptjs');
-      const hashedPassword = await bcrypt.hash('admin123', 10);
+      const hashedPasswordAdmin = await bcrypt.hash('admin123', 10);
+      const hashedPasswordPetugas = await bcrypt.hash('Petugas123', 10);
       
+      // Seed admin account
       await db.query(`
         INSERT INTO users (username, email, password, nama_lengkap, role)
         VALUES ('admin', 'admin@crm.com', $1, 'Administrator', 'admin')
-      `, [hashedPassword]);
+      `, [hashedPasswordAdmin]);
+
+      // Seed petugas accounts for testing
+      await db.query(`
+        INSERT INTO users (username, email, password, nama_lengkap, no_telepon, alamat, role, nip, divisi) VALUES
+        ('petugas1', 'petugas1@crm.com', $1, 'Petugas Infrastruktur', '081234567890', 'Jl. Merdeka No. 10', 'petugas', '198901012020011001', 'Infrastruktur'),
+        ('petugas2', 'petugas2@crm.com', $1, 'Petugas Kebersihan', '081234567891', 'Jl. Merdeka No. 11', 'petugas', '198902022020022002', 'Kebersihan')
+      `, [hashedPasswordPetugas]);
 
       // Seed some categories
       await db.query(`
