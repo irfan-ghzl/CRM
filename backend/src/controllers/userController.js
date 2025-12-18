@@ -1,0 +1,266 @@
+const bcrypt = require('bcryptjs');
+const db = require('../config/database');
+
+// Get all users (admin only)
+const getUsers = async (req, res) => {
+  try {
+    const { role, page = 1, limit = 10 } = req.query;
+    const offset = (page - 1) * limit;
+    
+    let query = `
+      SELECT id, username, email, nama_lengkap, no_telepon, alamat, role, 
+             nik, nip, divisi, created_at, updated_at
+      FROM users
+    `;
+    const params = [];
+    
+    if (role) {
+      query += ` WHERE role = $1`;
+      params.push(role);
+    }
+    
+    query += ` ORDER BY created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+    params.push(limit, offset);
+    
+    const result = await db.query(query, params);
+    
+    // Get total count
+    let countQuery = 'SELECT COUNT(*) FROM users';
+    const countParams = [];
+    if (role) {
+      countQuery += ' WHERE role = $1';
+      countParams.push(role);
+    }
+    const countResult = await db.query(countQuery, countParams);
+    const total = parseInt(countResult.rows[0].count);
+    
+    res.json({
+      data: result.rows,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Get users error:', error);
+    res.status(500).json({ message: 'Terjadi kesalahan saat mengambil data user' });
+  }
+};
+
+// Get petugas list (for assignment)
+const getPetugas = async (req, res) => {
+  try {
+    const result = await db.query(`
+      SELECT id, username, nama_lengkap, nip, divisi
+      FROM users
+      WHERE role = 'petugas'
+      ORDER BY nama_lengkap
+    `);
+    
+    res.json({ data: result.rows });
+  } catch (error) {
+    console.error('Get petugas error:', error);
+    res.status(500).json({ message: 'Terjadi kesalahan saat mengambil data petugas' });
+  }
+};
+
+// Get user by ID
+const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const result = await db.query(`
+      SELECT id, username, email, nama_lengkap, no_telepon, alamat, role,
+             nik, nip, divisi, created_at, updated_at
+      FROM users
+      WHERE id = $1
+    `, [id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'User tidak ditemukan' });
+    }
+    
+    res.json({ data: result.rows[0] });
+  } catch (error) {
+    console.error('Get user by ID error:', error);
+    res.status(500).json({ message: 'Terjadi kesalahan' });
+  }
+};
+
+// Create new user (admin only)
+const createUser = async (req, res) => {
+  try {
+    const { 
+      username, 
+      email, 
+      password, 
+      nama_lengkap, 
+      no_telepon, 
+      alamat, 
+      role,
+      nik,
+      nip,
+      divisi
+    } = req.body;
+    
+    // Validate role
+    if (!['masyarakat', 'petugas', 'admin'].includes(role)) {
+      return res.status(400).json({ message: 'Role tidak valid' });
+    }
+    
+    // Check if user exists
+    const userExists = await db.query(
+      'SELECT id FROM users WHERE username = $1 OR email = $2',
+      [username, email]
+    );
+    
+    if (userExists.rows.length > 0) {
+      return res.status(400).json({ message: 'Username atau email sudah terdaftar' });
+    }
+    
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // Insert user
+    const result = await db.query(
+      `INSERT INTO users (username, email, password, nama_lengkap, no_telepon, alamat, role, nik, nip, divisi)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       RETURNING id, username, email, nama_lengkap, no_telepon, alamat, role, nik, nip, divisi`,
+      [username, email, hashedPassword, nama_lengkap, no_telepon, alamat, role, nik, nip, divisi]
+    );
+    
+    res.status(201).json({
+      message: 'User berhasil dibuat',
+      data: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Create user error:', error);
+    res.status(500).json({ message: 'Terjadi kesalahan saat membuat user' });
+  }
+};
+
+// Update user (admin only)
+const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { 
+      nama_lengkap, 
+      email,
+      no_telepon, 
+      alamat, 
+      role,
+      nik,
+      nip,
+      divisi
+    } = req.body;
+    
+    // Validate role if provided
+    if (role && !['masyarakat', 'petugas', 'admin'].includes(role)) {
+      return res.status(400).json({ message: 'Role tidak valid' });
+    }
+    
+    // Check if email is already used by another user
+    if (email) {
+      const emailExists = await db.query(
+        'SELECT id FROM users WHERE email = $1 AND id != $2',
+        [email, id]
+      );
+      
+      if (emailExists.rows.length > 0) {
+        return res.status(400).json({ message: 'Email sudah digunakan oleh user lain' });
+      }
+    }
+    
+    const result = await db.query(
+      `UPDATE users 
+       SET nama_lengkap = COALESCE($1, nama_lengkap),
+           email = COALESCE($2, email),
+           no_telepon = COALESCE($3, no_telepon),
+           alamat = COALESCE($4, alamat),
+           role = COALESCE($5, role),
+           nik = COALESCE($6, nik),
+           nip = COALESCE($7, nip),
+           divisi = COALESCE($8, divisi),
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $9
+       RETURNING id, username, email, nama_lengkap, no_telepon, alamat, role, nik, nip, divisi`,
+      [nama_lengkap, email, no_telepon, alamat, role, nik, nip, divisi, id]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'User tidak ditemukan' });
+    }
+    
+    res.json({
+      message: 'User berhasil diupdate',
+      data: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({ message: 'Terjadi kesalahan saat mengupdate user' });
+  }
+};
+
+// Delete user (admin only)
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Prevent deleting own account
+    if (parseInt(id) === req.user.id) {
+      return res.status(400).json({ message: 'Tidak dapat menghapus akun sendiri' });
+    }
+    
+    const result = await db.query('DELETE FROM users WHERE id = $1 RETURNING id', [id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'User tidak ditemukan' });
+    }
+    
+    res.json({ message: 'User berhasil dihapus' });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({ message: 'Terjadi kesalahan saat menghapus user' });
+  }
+};
+
+// Change password (admin can change any user's password)
+const changePassword = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { password } = req.body;
+    
+    if (!password || password.length < 6) {
+      return res.status(400).json({ message: 'Password minimal 6 karakter' });
+    }
+    
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    const result = await db.query(
+      'UPDATE users SET password = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING id',
+      [hashedPassword, id]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'User tidak ditemukan' });
+    }
+    
+    res.json({ message: 'Password berhasil diubah' });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ message: 'Terjadi kesalahan saat mengubah password' });
+  }
+};
+
+module.exports = {
+  getUsers,
+  getPetugas,
+  getUserById,
+  createUser,
+  updateUser,
+  deleteUser,
+  changePassword
+};
