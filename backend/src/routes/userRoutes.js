@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware, roleMiddleware } = require('../middleware/auth');
+const { apiLimiter } = require('../middleware/rateLimiter');
 const { 
   getUsers, 
   getPetugas,
@@ -11,8 +12,8 @@ const {
   changePassword
 } = require('../controllers/userController');
 
-// All routes require authentication and admin role
-router.use(authMiddleware);
+// Apply rate limiting and authentication to all routes
+router.use(apiLimiter, authMiddleware);
 
 // Get all users (admin only)
 router.get('/', roleMiddleware('admin'), getUsers);
