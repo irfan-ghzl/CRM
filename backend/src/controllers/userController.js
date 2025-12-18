@@ -105,6 +105,28 @@ const createUser = async (req, res) => {
       divisi
     } = req.body;
     
+    // Validate required fields
+    if (!username || !email || !password || !nama_lengkap || !role) {
+      return res.status(400).json({ message: 'Username, email, password, nama_lengkap, dan role harus diisi' });
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Format email tidak valid' });
+    }
+    
+    // Validate password strength
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Password minimal 6 karakter' });
+    }
+    
+    // Validate username (alphanumeric and underscore only)
+    const usernameRegex = /^[a-zA-Z0-9_]+$/;
+    if (!usernameRegex.test(username)) {
+      return res.status(400).json({ message: 'Username hanya boleh berisi huruf, angka, dan underscore' });
+    }
+    
     // Validate role
     if (!['masyarakat', 'petugas', 'admin'].includes(role)) {
       return res.status(400).json({ message: 'Role tidak valid' });
@@ -156,16 +178,28 @@ const updateUser = async (req, res) => {
       divisi
     } = req.body;
     
+    // Validate ID is a positive integer
+    const userId = parseInt(id, 10);
+    if (isNaN(userId) || userId <= 0) {
+      return res.status(400).json({ message: 'ID user tidak valid' });
+    }
+    
     // Validate role if provided
     if (role && !['masyarakat', 'petugas', 'admin'].includes(role)) {
       return res.status(400).json({ message: 'Role tidak valid' });
     }
     
-    // Check if email is already used by another user
+    // Validate email format if provided
     if (email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: 'Format email tidak valid' });
+      }
+      
+      // Check if email is already used by another user
       const emailExists = await db.query(
         'SELECT id FROM users WHERE email = $1 AND id != $2',
-        [email, id]
+        [email, userId]
       );
       
       if (emailExists.rows.length > 0) {
@@ -186,7 +220,7 @@ const updateUser = async (req, res) => {
            updated_at = CURRENT_TIMESTAMP
        WHERE id = $9
        RETURNING id, username, email, nama_lengkap, no_telepon, alamat, role, nik, nip, divisi`,
-      [nama_lengkap, email, no_telepon, alamat, role, nik, nip, divisi, id]
+      [nama_lengkap, email, no_telepon, alamat, role, nik, nip, divisi, userId]
     );
     
     if (result.rows.length === 0) {

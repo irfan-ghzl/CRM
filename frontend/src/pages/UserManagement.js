@@ -20,6 +20,8 @@ function UserManagement() {
     divisi: ''
   });
   const [filterRole, setFilterRole] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteUserId, setDeleteUserId] = useState(null);
 
   useEffect(() => {
     loadUsers();
@@ -91,11 +93,10 @@ function UserManagement() {
 
     try {
       if (editingUser) {
-        // Update user
-        const updateData = { ...formData };
-        delete updateData.username; // Don't update username
-        if (!updateData.password) {
-          delete updateData.password; // Don't update password if empty
+        // Update user - exclude username and password if empty
+        const { username, password, ...updateData } = formData;
+        if (password) {
+          updateData.password = password;
         }
         await userService.update(editingUser.id, updateData);
       } else {
@@ -114,17 +115,27 @@ function UserManagement() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Apakah Anda yakin ingin menghapus user ini?')) {
-      return;
-    }
+  const handleDeleteClick = (id) => {
+    setDeleteUserId(id);
+    setShowDeleteConfirm(true);
+  };
 
+  const handleDeleteConfirm = async () => {
     try {
-      await userService.delete(id);
+      await userService.delete(deleteUserId);
+      setShowDeleteConfirm(false);
+      setDeleteUserId(null);
       loadUsers();
     } catch (err) {
-      alert(err.response?.data?.message || 'Terjadi kesalahan saat menghapus user');
+      setError(err.response?.data?.message || 'Terjadi kesalahan saat menghapus user');
+      setShowDeleteConfirm(false);
+      setDeleteUserId(null);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false);
+    setDeleteUserId(null);
   };
 
   const getRoleBadge = (role) => {
@@ -214,7 +225,7 @@ function UserManagement() {
                         Edit
                       </button>
                       <button 
-                        onClick={() => handleDelete(user.id)} 
+                        onClick={() => handleDeleteClick(user.id)} 
                         className="btn"
                         style={{ 
                           backgroundColor: '#dc3545', 
@@ -382,6 +393,42 @@ function UserManagement() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showDeleteConfirm && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div className="card" style={{ width: '100%', maxWidth: '400px' }}>
+            <h3>Konfirmasi Hapus</h3>
+            <p>Apakah Anda yakin ingin menghapus user ini?</p>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+              <button 
+                onClick={handleDeleteConfirm}
+                className="btn"
+                style={{ flex: 1, backgroundColor: '#dc3545', color: 'white' }}
+              >
+                Hapus
+              </button>
+              <button 
+                onClick={handleDeleteCancel}
+                className="btn"
+                style={{ flex: 1, backgroundColor: '#6c757d', color: 'white' }}
+              >
+                Batal
+              </button>
+            </div>
           </div>
         </div>
       )}
