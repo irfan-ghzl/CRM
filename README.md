@@ -117,6 +117,15 @@ npm start
 - `GET /api/auth/profile` - Get user profile
 - `PUT /api/auth/profile` - Update profile
 
+### User Management (Admin Only)
+- `GET /api/users` - List all users
+- `GET /api/users/petugas` - List petugas users
+- `GET /api/users/:id` - Get user by ID
+- `POST /api/users` - Create new user (any role)
+- `PUT /api/users/:id` - Update user
+- `PUT /api/users/:id/password` - Change user password
+- `DELETE /api/users/:id` - Delete user
+
 ### Pengaduan
 - `GET /api/pengaduan` - List pengaduan
 - `POST /api/pengaduan` - Buat pengaduan baru

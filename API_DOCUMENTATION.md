@@ -520,3 +520,183 @@ const createPengaduan = async (token, data) => {
 - ✅ Manage categories
 - ✅ Assign pengaduan to petugas
 - ✅ View statistics
+
+## User Management (Admin Only)
+
+### Get All Users
+```
+GET /api/users?role=petugas&page=1&limit=10
+```
+
+**Query Parameters:**
+- `role` (optional): masyarakat, petugas, admin
+- `page` (optional): integer (default: 1)
+- `limit` (optional): integer (default: 10)
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "id": 2,
+      "username": "petugas1",
+      "email": "petugas1@crm.com",
+      "nama_lengkap": "Petugas Satu",
+      "no_telepon": "081234567890",
+      "alamat": "Address",
+      "role": "petugas",
+      "nip": "198901012020011001",
+      "divisi": "Infrastruktur",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 50,
+    "totalPages": 5
+  }
+}
+```
+
+### Get Petugas List
+```
+GET /api/users/petugas
+```
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "id": 2,
+      "username": "petugas1",
+      "nama_lengkap": "Petugas Satu",
+      "nip": "198901012020011001",
+      "divisi": "Infrastruktur"
+    }
+  ]
+}
+```
+
+### Get User by ID
+```
+GET /api/users/:id
+```
+
+**Response:**
+```json
+{
+  "data": {
+    "id": 2,
+    "username": "petugas1",
+    "email": "petugas1@crm.com",
+    "nama_lengkap": "Petugas Satu",
+    "no_telepon": "081234567890",
+    "alamat": "Address",
+    "role": "petugas",
+    "nip": "198901012020011001",
+    "divisi": "Infrastruktur",
+    "created_at": "2024-01-01T00:00:00.000Z",
+    "updated_at": "2024-01-01T00:00:00.000Z"
+  }
+}
+```
+
+### Create User
+```
+POST /api/users
+```
+
+**Body:**
+```json
+{
+  "username": "petugas1",
+  "email": "petugas1@crm.com",
+  "password": "password123",
+  "nama_lengkap": "Petugas Satu",
+  "no_telepon": "081234567890",
+  "alamat": "Jl. Merdeka No. 1",
+  "role": "petugas",
+  "nip": "198901012020011001",
+  "divisi": "Infrastruktur"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "User berhasil dibuat",
+  "data": {
+    "id": 2,
+    "username": "petugas1",
+    "email": "petugas1@crm.com",
+    "nama_lengkap": "Petugas Satu",
+    "role": "petugas"
+  }
+}
+```
+
+### Update User
+```
+PUT /api/users/:id
+```
+
+**Body:**
+```json
+{
+  "nama_lengkap": "Petugas Satu Updated",
+  "email": "petugas1.new@crm.com",
+  "no_telepon": "081234567890",
+  "alamat": "New Address",
+  "role": "petugas",
+  "nip": "198901012020011001",
+  "divisi": "Kebersihan"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "User berhasil diupdate",
+  "data": {
+    "id": 2,
+    "username": "petugas1",
+    "email": "petugas1.new@crm.com",
+    "nama_lengkap": "Petugas Satu Updated",
+    "role": "petugas"
+  }
+}
+```
+
+### Change User Password
+```
+PUT /api/users/:id/password
+```
+
+**Body:**
+```json
+{
+  "password": "newpassword123"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Password berhasil diubah"
+}
+```
+
+### Delete User
+```
+DELETE /api/users/:id
+```
+
+**Response:**
+```json
+{
+  "message": "User berhasil dihapus"
+}
+```
