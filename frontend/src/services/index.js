@@ -132,3 +132,41 @@ export const notifikasiService = {
     return response.data;
   },
 };
+
+export const userService = {
+  getAll: async (params) => {
+    const response = await api.get('/users', { params });
+    return response.data;
+  },
+
+  getPetugas: async () => {
+    const response = await api.get('/users/petugas');
+    return response.data;
+  },
+
+  getById: async (id) => {
+    const response = await api.get(`/users/${id}`);
+    return response.data;
+  },
+
+  create: async (data) => {
+    const response = await api.post('/users', data);
+    return response.data;
+  },
+
+  update: async (id, data) => {
+    const response = await api.put(`/users/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id) => {
+    const response = await api.delete(`/users/${id}`);
+    return response.data;
+  },
+
+  changePassword: async (id, password) => {
+    const response = await api.put(`/users/${id}/password`, { password });
+    return response.data;
+  },
+};
+

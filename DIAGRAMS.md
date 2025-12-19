@@ -48,48 +48,232 @@ graph TB
 
 ## 2. Activity Diagram
 
-Diagram aktivitas menggambarkan alur proses pengajuan dan penanganan pengaduan.
+Diagram aktivitas menggambarkan alur proses untuk setiap role pengguna dalam sistem.
+
+### 2.1 Activity Diagram - Masyarakat
+
+Diagram aktivitas untuk role Masyarakat menggambarkan alur dari registrasi hingga memberikan feedback.
 
 ```mermaid
 flowchart TD
-    Start([Mulai]) --> Login{User<br/>Login?}
-    Login -->|Belum| Register[Registrasi Akun]
-    Register --> LoginForm[Form Login]
-    Login -->|Sudah| LoginForm
-    LoginForm --> Auth{Autentikasi<br/>Berhasil?}
-    Auth -->|Tidak| LoginForm
-    Auth -->|Ya| Dashboard[Dashboard]
+    Start([Mulai]) --> CheckLogin{Sudah Punya<br/>Akun?}
+    CheckLogin -->|Belum| Register[Registrasi Akun]
+    Register --> InputRegister[Input Data:<br/>Username, Email, Password<br/>NIK, Nama, Alamat]
+    InputRegister --> ValidasiRegister{Data<br/>Valid?}
+    ValidasiRegister -->|Tidak| InputRegister
+    ValidasiRegister -->|Ya| AccountCreated[Akun Berhasil Dibuat]
+    AccountCreated --> LoginPage[Halaman Login]
     
-    Dashboard --> BuatPengaduan[Buat Pengaduan Baru]
-    BuatPengaduan --> IsiForm[Isi Form Pengaduan]
-    IsiForm --> UploadBukti[Upload Bukti/Foto]
+    CheckLogin -->|Sudah| LoginPage
+    LoginPage --> InputCredentials[Input Username & Password]
+    InputCredentials --> Auth{Autentikasi<br/>Berhasil?}
+    Auth -->|Tidak| LoginPage
+    Auth -->|Ya| DashboardMasy[Dashboard Masyarakat]
+    
+    DashboardMasy --> PilihMenu{Pilih Menu}
+    PilihMenu -->|Buat Pengaduan| FormPengaduan[Form Pengaduan Baru]
+    FormPengaduan --> InputPengaduan[Input:<br/>Judul, Isi, Lokasi<br/>Kategori, Prioritas]
+    InputPengaduan --> UploadBukti[Upload Bukti/Foto<br/>Optional]
     UploadBukti --> ValidasiForm{Form<br/>Valid?}
-    ValidasiForm -->|Tidak| IsiForm
-    ValidasiForm -->|Ya| Submit[Submit Pengaduan]
+    ValidasiForm -->|Tidak| InputPengaduan
+    ValidasiForm -->|Ya| SubmitPengaduan[Submit Pengaduan]
+    SubmitPengaduan --> NomorPengaduan[Tampilkan Nomor Pengaduan]
+    NomorPengaduan --> NotifSubmit[Terima Notifikasi Konfirmasi]
+    NotifSubmit --> DashboardMasy
     
-    Submit --> Notif1[Notifikasi ke Masyarakat]
-    Submit --> AssignPetugas[Assign ke Petugas]
+    PilihMenu -->|Lihat Status| ListPengaduan[List Pengaduan Saya]
+    ListPengaduan --> DetailPengaduan[Lihat Detail Pengaduan]
+    DetailPengaduan --> CheckStatus{Status<br/>Pengaduan?}
+    CheckStatus -->|Pending| WaitNotif[Tunggu Notifikasi Update]
+    CheckStatus -->|Diproses| ViewProgress[Lihat Progress]
+    CheckStatus -->|Selesai| ViewTanggapan[Lihat Tanggapan Petugas]
+    ViewTanggapan --> Satisfied{Puas dengan<br/>Tanggapan?}
+    Satisfied -->|Ya| BeriRating[Beri Rating & Komentar]
+    BeriRating --> End([Selesai])
+    Satisfied -->|Tidak| PengaduanBaru[Buat Pengaduan Baru]
+    PengaduanBaru --> FormPengaduan
     
-    AssignPetugas --> PetugasReview[Petugas Review Pengaduan]
-    PetugasReview --> ValidasiPengaduan{Pengaduan<br/>Valid?}
-    ValidasiPengaduan -->|Tidak Valid| TolakPengaduan[Tolak Pengaduan]
-    TolakPengaduan --> NotifTolak[Notifikasi Penolakan]
+    PilihMenu -->|Update Pengaduan| SelectPengaduan[Pilih Pengaduan]
+    SelectPengaduan --> CheckStatusEdit{Status<br/>Pending?}
+    CheckStatusEdit -->|Ya| EditForm[Edit Form Pengaduan]
+    EditForm --> SaveChanges[Simpan Perubahan]
+    SaveChanges --> DashboardMasy
+    CheckStatusEdit -->|Tidak| CannotEdit[Tidak Bisa Edit<br/>Status Sudah Diproses]
+    CannotEdit --> DashboardMasy
     
-    ValidasiPengaduan -->|Valid| ProsesPengaduan[Proses Pengaduan]
-    ProsesPengaduan --> UpdateStatus1[Update Status: Diproses]
-    UpdateStatus1 --> Notif2[Notifikasi ke Masyarakat]
+    PilihMenu -->|Hapus Pengaduan| SelectDelete[Pilih Pengaduan]
+    SelectDelete --> ConfirmDelete{Konfirmasi<br/>Hapus?}
+    ConfirmDelete -->|Ya| DeletePengaduan[Hapus Pengaduan]
+    DeletePengaduan --> DashboardMasy
+    ConfirmDelete -->|Tidak| DashboardMasy
     
-    UpdateStatus1 --> Tindakan[Lakukan Tindakan]
-    Tindakan --> UpdateStatus2[Update Status: Selesai]
-    UpdateStatus2 --> BuatTanggapan[Buat Tanggapan]
-    BuatTanggapan --> Notif3[Notifikasi Selesai]
+    PilihMenu -->|Logout| Logout[Logout]
+    WaitNotif --> DashboardMasy
+    ViewProgress --> DashboardMasy
+    Logout --> End
+```
+
+### 2.2 Activity Diagram - Petugas
+
+Diagram aktivitas untuk role Petugas menggambarkan alur mengelola dan menanggapi pengaduan.
+
+```mermaid
+flowchart TD
+    Start([Mulai]) --> LoginPetugas[Halaman Login]
+    LoginPetugas --> InputCred[Input Username & Password]
+    InputCred --> AuthPetugas{Autentikasi<br/>Berhasil?}
+    AuthPetugas -->|Tidak| LoginPetugas
+    AuthPetugas -->|Ya| DashboardPetugas[Dashboard Petugas]
     
-    NotifTolak --> End([Selesai])
-    Notif3 --> Feedback{Masyarakat<br/>Puas?}
-    Feedback -->|Ya| Rating[Beri Rating]
-    Feedback -->|Tidak| BuatPengaduanLanjutan[Buat Pengaduan Lanjutan]
-    BuatPengaduanLanjutan --> IsiForm
-    Rating --> End
+    DashboardPetugas --> NotifBaru{Ada Notifikasi<br/>Pengaduan Baru?}
+    NotifBaru -->|Ya| LihatNotif[Lihat Notifikasi]
+    LihatNotif --> DashboardPetugas
+    NotifBaru -->|Tidak| PilihMenuPetugas{Pilih Menu}
+    
+    PilihMenuPetugas -->|Kelola Pengaduan| FilterPengaduan[Filter Pengaduan<br/>Assigned ke Saya]
+    FilterPengaduan --> ListPengaduanPetugas[List Pengaduan]
+    ListPengaduanPetugas --> PilihPengaduan[Pilih Pengaduan]
+    PilihPengaduan --> DetailPengaduanPet[Lihat Detail Lengkap<br/>Judul, Isi, Lokasi, Bukti]
+    
+    DetailPengaduanPet --> ReviewPengaduan{Pengaduan<br/>Valid?}
+    ReviewPengaduan -->|Tidak Valid| TolakPengaduan[Update Status: Ditolak]
+    TolakPengaduan --> InputAlasan[Input Alasan Penolakan]
+    InputAlasan --> NotifPenolakan[Kirim Notifikasi ke Masyarakat]
+    NotifPenolakan --> DashboardPetugas
+    
+    ReviewPengaduan -->|Valid| TerimaPengaduan[Update Status: Diproses]
+    TerimaPengaduan --> NotifDiproses[Notifikasi ke Masyarakat]
+    NotifDiproses --> ProsesPengaduan[Lakukan Tindakan<br/>Sesuai Pengaduan]
+    ProsesPengaduan --> UpdateProgress{Perlu Update<br/>Progress?}
+    UpdateProgress -->|Ya| UpdateStatus[Update Status & Keterangan]
+    UpdateStatus --> NotifUpdate[Kirim Notifikasi Update]
+    NotifUpdate --> ProsesPengaduan
+    
+    UpdateProgress -->|Selesai| SelesaiPengaduan[Update Status: Selesai]
+    SelesaiPengaduan --> BuatTanggapan[Buat Tanggapan]
+    BuatTanggapan --> InputTanggapan[Input Isi Tanggapan<br/>Hasil & Solusi]
+    InputTanggapan --> SubmitTanggapan[Submit Tanggapan]
+    SubmitTanggapan --> NotifSelesai[Notifikasi Selesai ke Masyarakat]
+    NotifSelesai --> DashboardPetugas
+    
+    PilihMenuPetugas -->|Update Status| SelectPengaduanStatus[Pilih Pengaduan]
+    SelectPengaduanStatus --> ChangeStatus[Ubah Status Pengaduan]
+    ChangeStatus --> InputKeterangan[Input Keterangan]
+    InputKeterangan --> SaveStatus[Simpan Perubahan Status]
+    SaveStatus --> NotifStatusChange[Kirim Notifikasi]
+    NotifStatusChange --> DashboardPetugas
+    
+    PilihMenuPetugas -->|Tanggapi Pengaduan| SelectPengaduanTanggapan[Pilih Pengaduan Selesai]
+    SelectPengaduanTanggapan --> CheckTanggapan{Sudah Ada<br/>Tanggapan?}
+    CheckTanggapan -->|Belum| BuatTanggapan
+    CheckTanggapan -->|Sudah| ViewTanggapanExist[Lihat Tanggapan]
+    ViewTanggapanExist --> DashboardPetugas
+    
+    PilihMenuPetugas -->|Logout| LogoutPetugas[Logout]
+    LogoutPetugas --> End([Selesai])
+```
+
+### 2.3 Activity Diagram - Admin
+
+Diagram aktivitas untuk role Admin menggambarkan alur mengelola sistem, pengguna, dan laporan.
+
+```mermaid
+flowchart TD
+    Start([Mulai]) --> LoginAdmin[Halaman Login]
+    LoginAdmin --> InputCredAdmin[Input Username & Password]
+    InputCredAdmin --> AuthAdmin{Autentikasi<br/>Berhasil?}
+    AuthAdmin -->|Tidak| LoginAdmin
+    AuthAdmin -->|Ya| DashboardAdmin[Dashboard Admin]
+    
+    DashboardAdmin --> ViewStats[Lihat Statistik<br/>Total Pengaduan, Status, dll]
+    ViewStats --> PilihMenuAdmin{Pilih Menu}
+    
+    PilihMenuAdmin -->|Kelola Pengguna| MenuKelolaUser{Pilih Aksi<br/>User Management}
+    MenuKelolaUser -->|List User| FilterUser[Filter User by Role<br/>Masyarakat/Petugas/Admin]
+    FilterUser --> ListUsers[Tampilkan List Users]
+    ListUsers --> MenuKelolaUser
+    
+    MenuKelolaUser -->|Tambah User| FormTambahUser[Form User Baru]
+    FormTambahUser --> InputUserData[Input Data:<br/>Username, Email, Password<br/>Nama, Role]
+    InputUserData --> InputRoleSpecific{Role?}
+    InputRoleSpecific -->|Petugas| InputNIPDivisi[Input NIP & Divisi]
+    InputRoleSpecific -->|Masyarakat| InputNIK[Input NIK]
+    InputRoleSpecific -->|Admin| SkipExtra[Skip Extra Fields]
+    InputNIPDivisi --> ValidasiUser{Data<br/>Valid?}
+    InputNIK --> ValidasiUser
+    SkipExtra --> ValidasiUser
+    ValidasiUser -->|Tidak| InputUserData
+    ValidasiUser -->|Ya| SaveUser[Simpan User Baru]
+    SaveUser --> DashboardAdmin
+    
+    MenuKelolaUser -->|Edit User| SelectUser[Pilih User]
+    SelectUser --> EditFormUser[Form Edit User]
+    EditFormUser --> UpdateUserData[Update Data User]
+    UpdateUserData --> SaveUpdateUser[Simpan Perubahan]
+    SaveUpdateUser --> DashboardAdmin
+    
+    MenuKelolaUser -->|Hapus User| SelectDeleteUser[Pilih User]
+    SelectDeleteUser --> ConfirmDeleteUser{Konfirmasi<br/>Hapus?}
+    ConfirmDeleteUser -->|Ya| DeleteUser[Hapus User]
+    DeleteUser --> DashboardAdmin
+    ConfirmDeleteUser -->|Tidak| DashboardAdmin
+    
+    PilihMenuAdmin -->|Kelola Kategori| MenuKelolaKategori{Pilih Aksi<br/>Kategori}
+    MenuKelolaKategori -->|List Kategori| ListKategori[Tampilkan List Kategori]
+    ListKategori --> MenuKelolaKategori
+    
+    MenuKelolaKategori -->|Tambah Kategori| FormKategori[Form Kategori Baru]
+    FormKategori --> InputKategori[Input:<br/>Nama, Deskripsi, Icon]
+    InputKategori --> ValidasiKategori{Data<br/>Valid?}
+    ValidasiKategori -->|Tidak| InputKategori
+    ValidasiKategori -->|Ya| SaveKategori[Simpan Kategori]
+    SaveKategori --> DashboardAdmin
+    
+    MenuKelolaKategori -->|Edit Kategori| SelectKategori[Pilih Kategori]
+    SelectKategori --> EditFormKategori[Form Edit Kategori]
+    EditFormKategori --> UpdateKategori[Update Data Kategori]
+    UpdateKategori --> SaveUpdateKategori[Simpan Perubahan]
+    SaveUpdateKategori --> DashboardAdmin
+    
+    MenuKelolaKategori -->|Hapus Kategori| SelectDeleteKat[Pilih Kategori]
+    SelectDeleteKat --> ConfirmDeleteKat{Konfirmasi<br/>Hapus?}
+    ConfirmDeleteKat -->|Ya| DeleteKategori[Hapus Kategori]
+    DeleteKategori --> DashboardAdmin
+    ConfirmDeleteKat -->|Tidak| DashboardAdmin
+    
+    PilihMenuAdmin -->|Kelola Pengaduan| ViewAllPengaduan[Lihat Semua Pengaduan]
+    ViewAllPengaduan --> FilterPengaduanAdmin[Filter by Status/Kategori]
+    FilterPengaduanAdmin --> SelectPengaduanAdmin[Pilih Pengaduan]
+    SelectPengaduanAdmin --> ActionPengaduan{Pilih Aksi}
+    
+    ActionPengaduan -->|Assign Petugas| ListPetugas[Tampilkan List Petugas]
+    ListPetugas --> SelectPetugas[Pilih Petugas]
+    SelectPetugas --> AssignToPetugas[Assign Pengaduan ke Petugas]
+    AssignToPetugas --> UpdateStatusProses[Update Status: Diproses]
+    UpdateStatusProses --> NotifPetugas[Notifikasi ke Petugas]
+    NotifPetugas --> DashboardAdmin
+    
+    ActionPengaduan -->|Update Status| ChangeStatusAdmin[Ubah Status]
+    ChangeStatusAdmin --> DashboardAdmin
+    
+    ActionPengaduan -->|View Detail| ViewDetailAdmin[Lihat Detail Lengkap]
+    ViewDetailAdmin --> DashboardAdmin
+    
+    PilihMenuAdmin -->|Buat Laporan| SelectPeriode[Pilih Periode Laporan]
+    SelectPeriode --> SelectJenisLaporan{Jenis<br/>Laporan?}
+    SelectJenisLaporan -->|By Status| LaporanStatus[Generate Laporan Status]
+    SelectJenisLaporan -->|By Kategori| LaporanKategori[Generate Laporan Kategori]
+    SelectJenisLaporan -->|By Petugas| LaporanPetugas[Generate Laporan Kinerja]
+    LaporanStatus --> ExportLaporan[Export PDF/Excel]
+    LaporanKategori --> ExportLaporan
+    LaporanPetugas --> ExportLaporan
+    ExportLaporan --> DashboardAdmin
+    
+    PilihMenuAdmin -->|Lihat Statistik| ViewStatistikDetail[Statistik Detail<br/>Chart & Grafik]
+    ViewStatistikDetail --> DashboardAdmin
+    
+    PilihMenuAdmin -->|Logout| LogoutAdmin[Logout]
+    LogoutAdmin --> End([Selesai])
 ```
 
 ## 3. Sequence Diagram
@@ -318,12 +502,29 @@ Menampilkan tiga aktor utama:
 - **Admin**: Dapat login, membuat laporan, mengelola pengguna dan kategori
 
 ### Activity Diagram
-Menggambarkan alur lengkap dari:
-1. Login/Registrasi
-2. Pembuatan pengaduan
-3. Validasi dan assignment ke petugas
-4. Review dan proses pengaduan
-5. Penyelesaian dan feedback
+Menggambarkan alur aktivitas spesifik untuk setiap role pengguna:
+
+#### Activity Diagram - Masyarakat:
+1. Registrasi dan Login
+2. Pembuatan pengaduan baru dengan upload bukti
+3. Melihat status dan detail pengaduan
+4. Update dan hapus pengaduan (jika status pending)
+5. Memberikan rating untuk pengaduan selesai
+
+#### Activity Diagram - Petugas:
+1. Login dan melihat notifikasi pengaduan baru
+2. Review dan validasi pengaduan
+3. Update status pengaduan (pending, diproses, selesai, ditolak)
+4. Membuat tanggapan untuk pengaduan selesai
+5. Mengelola pengaduan yang di-assign
+
+#### Activity Diagram - Admin:
+1. Login dan melihat statistik sistem
+2. Mengelola pengguna (CRUD untuk Masyarakat, Petugas, Admin)
+3. Mengelola kategori pengaduan (CRUD)
+4. Mengelola dan assign pengaduan ke petugas
+5. Membuat laporan (by status, kategori, kinerja petugas)
+6. Melihat statistik detail dengan chart dan grafik
 
 ### Sequence Diagram
 Menunjukkan interaksi antar komponen:

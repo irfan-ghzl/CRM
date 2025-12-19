@@ -133,19 +133,38 @@ const createTables = async () => {
 
 const seedData = async () => {
   try {
-    // Check if admin exists
-    const adminCheck = await db.query("SELECT id FROM users WHERE username = 'admin'");
+    const bcrypt = require('bcryptjs');
     
+    // Check and seed admin account
+    const adminCheck = await db.query("SELECT id FROM users WHERE username = 'admin'");
     if (adminCheck.rows.length === 0) {
-      const bcrypt = require('bcryptjs');
-      const hashedPassword = await bcrypt.hash('admin123', 10);
+      const hashedPasswordAdmin = await bcrypt.hash('admin123', 10);
       
       await db.query(`
         INSERT INTO users (username, email, password, nama_lengkap, role)
         VALUES ('admin', 'admin@crm.com', $1, 'Administrator', 'admin')
-      `, [hashedPassword]);
+      `, [hashedPasswordAdmin]);
+      
+      console.log('Admin account created');
+    }
 
-      // Seed some categories
+    // Check and seed petugas accounts
+    const petugas1Check = await db.query("SELECT id FROM users WHERE username = 'petugas1'");
+    if (petugas1Check.rows.length === 0) {
+      const hashedPasswordPetugas = await bcrypt.hash('Petugas123', 10);
+      
+      await db.query(`
+        INSERT INTO users (username, email, password, nama_lengkap, no_telepon, alamat, role, nip, divisi) VALUES
+        ('petugas1', 'petugas1@crm.com', $1, 'Petugas Infrastruktur', '081234567890', 'Jl. Merdeka No. 10', 'petugas', '198901012020011001', 'Infrastruktur'),
+        ('petugas2', 'petugas2@crm.com', $1, 'Petugas Kebersihan', '081234567891', 'Jl. Merdeka No. 11', 'petugas', '198902022020022002', 'Kebersihan')
+      `, [hashedPasswordPetugas]);
+      
+      console.log('Petugas accounts created');
+    }
+
+    // Check and seed categories
+    const kategoriCheck = await db.query("SELECT id FROM kategori LIMIT 1");
+    if (kategoriCheck.rows.length === 0) {
       await db.query(`
         INSERT INTO kategori (nama_kategori, deskripsi, icon) VALUES
         ('Infrastruktur', 'Pengaduan terkait jalan, jembatan, dan fasilitas publik', 'build'),
@@ -154,9 +173,11 @@ const seedData = async () => {
         ('Pelayanan Publik', 'Pengaduan terkait pelayanan administrasi', 'people'),
         ('Lainnya', 'Pengaduan kategori lainnya', 'more_horiz')
       `);
-
-      console.log('Seed data inserted successfully');
+      
+      console.log('Categories created');
     }
+
+    console.log('Seed data completed successfully');
   } catch (error) {
     console.error('Error seeding data:', error);
   }

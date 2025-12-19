@@ -8,11 +8,19 @@ import Dashboard from './pages/Dashboard';
 import PengaduanList from './pages/PengaduanList';
 import PengaduanForm from './pages/PengaduanForm';
 import PengaduanDetail from './pages/PengaduanDetail';
+import UserManagement from './pages/UserManagement';
 import { authService } from './services';
 
 function PrivateRoute({ children }) {
   const user = authService.getCurrentUser();
   return user ? children : <Navigate to="/login" />;
+}
+
+function AdminRoute({ children }) {
+  const user = authService.getCurrentUser();
+  if (!user) return <Navigate to="/login" />;
+  if (user.role !== 'admin') return <Navigate to="/" />;
+  return children;
 }
 
 function App() {
@@ -51,6 +59,14 @@ function App() {
             <PrivateRoute>
               <PengaduanDetail />
             </PrivateRoute>
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <AdminRoute>
+              <UserManagement />
+            </AdminRoute>
           }
         />
       </Routes>
