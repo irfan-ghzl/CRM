@@ -174,6 +174,26 @@ Setelah migrasi, gunakan akun berikut untuk login:
 
 ⚠️ **Penting**: Ganti password default setelah login pertama!
 
+### 🔄 Jika Petugas Tidak Muncul di Database
+
+Jika setelah migrasi hanya ada akun admin (tanpa petugas), jalankan migrasi lagi:
+
+**Untuk Docker:**
+```bash
+docker-compose restart backend
+# atau
+docker-compose down
+docker-compose up -d
+```
+
+**Untuk Manual Installation:**
+```bash
+cd backend
+npm run migrate
+```
+
+Migrasi akan otomatis mengecek dan menambahkan akun petugas jika belum ada, tanpa menghapus data yang sudah ada.
+
 ## 👥 Membuat dan Login sebagai Petugas
 
 ### Login dengan Akun Petugas yang Sudah Ada:
