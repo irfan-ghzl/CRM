@@ -178,19 +178,37 @@ Setelah migrasi, gunakan akun berikut untuk login:
 
 Jika setelah migrasi hanya ada akun admin (tanpa petugas), jalankan migrasi lagi:
 
-**Untuk Docker:**
+**Untuk Docker (PENTING - Rebuild image):**
 ```bash
-docker-compose restart backend
-# atau
 docker-compose down
+docker-compose build --no-cache backend
 docker-compose up -d
 ```
+
+**Atau rebuild semua sekaligus:**
+```bash
+docker-compose down
+docker-compose up -d --build
+```
+
+**Catatan:** `docker-compose up -d` saja TIDAK akan rebuild image. Gunakan `--build` flag atau `docker-compose build` untuk mendapatkan kode terbaru.
 
 **Untuk Manual Installation:**
 ```bash
 cd backend
+npm install  # Pastikan dependencies terinstall
 npm run migrate
 ```
+
+**Verifikasi akun sudah dibuat:**
+```bash
+docker exec -it crm-postgres psql -U postgres -d crm_db -c "SELECT username, role FROM users;"
+```
+
+Harusnya muncul:
+- admin (admin)
+- petugas1 (petugas)  
+- petugas2 (petugas)
 
 Migrasi akan otomatis mengecek dan menambahkan akun petugas jika belum ada, tanpa menghapus data yang sudah ada.
 
