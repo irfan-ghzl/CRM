@@ -302,9 +302,9 @@ sequenceDiagram
     M->>UI: Klik buat pengaduan
     UI->>M: Tampilkan form pengaduan
     M->>UI: Isi form & upload bukti
-    UI->>API: POST /api/complaints
+    UI->>API: POST /api/pengaduan
     API->>DB: Simpan pengaduan
-    DB-->>API: Complaint ID
+    DB-->>API: Pengaduan ID
     API->>Notif: Kirim notifikasi
     Notif-->>M: Email/SMS konfirmasi
     API->>DB: Assign ke petugas
@@ -316,14 +316,14 @@ sequenceDiagram
     P->>UI: Login sebagai petugas
     UI->>P: Dashboard petugas
     P->>UI: Lihat pengaduan
-    UI->>API: GET /api/complaints/{id}
+    UI->>API: GET /api/pengaduan/{id}
     API->>DB: Query detail pengaduan
     DB-->>API: Data pengaduan
     API-->>UI: Data pengaduan
     UI-->>P: Tampilkan detail
     
     P->>UI: Update status pengaduan
-    UI->>API: PUT /api/complaints/{id}/status
+    UI->>API: PUT /api/pengaduan/{id}/status
     API->>DB: Update status
     DB-->>API: Success
     API->>Notif: Kirim notifikasi update
@@ -332,7 +332,7 @@ sequenceDiagram
     UI-->>P: Konfirmasi update
     
     P->>UI: Buat tanggapan
-    UI->>API: POST /api/complaints/{id}/response
+    UI->>API: POST /api/tanggapan
     API->>DB: Simpan tanggapan
     DB-->>API: Response ID
     API->>Notif: Kirim notifikasi
