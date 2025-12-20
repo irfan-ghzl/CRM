@@ -8,11 +8,14 @@ router.use(apiLimiter, authMiddleware);
 
 router.post('/', createLimiter, pengaduanController.createPengaduan);
 router.get('/', pengaduanController.getPengaduan);
-router.get('/statistics', roleMiddleware('admin', 'petugas'), pengaduanController.getStatistics);
+router.get('/statistics', roleMiddleware('petugas'), pengaduanController.getStatistics);
 router.get('/:id', pengaduanController.getPengaduanById);
 router.put('/:id', pengaduanController.updatePengaduan);
 router.delete('/:id', pengaduanController.deletePengaduan);
-router.put('/:id/status', roleMiddleware('admin', 'petugas'), pengaduanController.updateStatus);
-router.put('/:id/assign', roleMiddleware('admin'), pengaduanController.assignPetugas);
+router.put('/:id/status', roleMiddleware('petugas'), pengaduanController.updateStatus);
+
+// === ADMIN ROUTES - COMMENTED OUT ===
+// router.put('/:id/assign', roleMiddleware('admin'), pengaduanController.assignPetugas);
+// === END ADMIN ROUTES ===
 
 module.exports = router;

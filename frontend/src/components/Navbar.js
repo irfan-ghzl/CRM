@@ -21,9 +21,11 @@ function Navbar() {
           {user.role === 'masyarakat' && (
             <Link to="/pengaduan/new">Buat Pengaduan</Link>
           )}
+          {/* === ADMIN MENU - COMMENTED OUT ===
           {user.role === 'admin' && (
             <Link to="/users">Kelola User</Link>
           )}
+          === END ADMIN MENU === */}
           <span>{user.nama_lengkap} ({user.role})</span>
           <button className="btn btn-danger" onClick={handleLogout} style={{ marginLeft: '10px' }}>
             Logout

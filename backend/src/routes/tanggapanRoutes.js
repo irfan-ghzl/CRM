@@ -6,7 +6,8 @@ const { apiLimiter } = require('../middleware/rateLimiter');
 
 router.use(apiLimiter, authMiddleware);
 
-router.post('/', roleMiddleware('admin', 'petugas'), tanggapanController.createTanggapan);
+// Changed from roleMiddleware('admin', 'petugas') to only 'petugas'
+router.post('/', roleMiddleware('petugas'), tanggapanController.createTanggapan);
 router.get('/pengaduan/:pengaduan_id', tanggapanController.getTanggapanByPengaduan);
 
 module.exports = router;

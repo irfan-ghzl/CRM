@@ -18,14 +18,14 @@ graph TB
         UC7[Kelola Pengaduan]
         UC8[Tanggapi Pengaduan]
         UC9[Update Status Pengaduan]
-        UC10[Buat Laporan]
-        UC11[Kelola Pengguna]
-        UC12[Kelola Kategori]
+        %% UC10[Buat Laporan] - Admin only, commented out
+        %% UC11[Kelola Pengguna] - Admin only, commented out
+        %% UC12[Kelola Kategori] - Admin only, commented out
     end
     
     Masyarakat((Masyarakat))
     Petugas((Petugas))
-    Admin((Admin))
+    %% Admin((Admin)) - Commented out
     
     Masyarakat --> UC1
     Masyarakat --> UC2
@@ -39,11 +39,11 @@ graph TB
     Petugas --> UC8
     Petugas --> UC9
     
-    Admin --> UC2
-    Admin --> UC10
-    Admin --> UC11
-    Admin --> UC12
-    Admin --> UC7
+    %% Admin --> UC2 - Commented out
+    %% Admin --> UC10 - Commented out
+    %% Admin --> UC11 - Commented out
+    %% Admin --> UC12 - Commented out
+    %% Admin --> UC7 - Commented out
 ```
 
 ## 2. Activity Diagram
@@ -173,9 +173,11 @@ flowchart TD
     LogoutPetugas --> End([Selesai])
 ```
 
-### 2.3 Activity Diagram - Admin
+### 2.3 Activity Diagram - Admin (COMMENTED OUT)
 
+<!-- 
 Diagram aktivitas untuk role Admin menggambarkan alur mengelola sistem, pengguna, dan laporan.
+Admin role has been commented out as per request.
 
 ```mermaid
 flowchart TD
@@ -275,6 +277,7 @@ flowchart TD
     PilihMenuAdmin -->|Logout| LogoutAdmin[Logout]
     LogoutAdmin --> End([Selesai])
 ```
+-->
 
 ## 3. Sequence Diagram
 
@@ -383,13 +386,14 @@ classDiagram
         +buatTanggapan()
     }
     
-    class Admin {
-        +kelolaUser()
-        +kelolaPengaduan()
-        +kelolaKategori()
-        +buatLaporan()
-        +lihatStatistik()
-    }
+    %% class Admin {
+    %%     +kelolaUser()
+    %%     +kelolaPengaduan()
+    %%     +kelolaKategori()
+    %%     +buatLaporan()
+    %%     +lihatStatistik()
+    %% }
+    %% Admin class commented out
     
     class Pengaduan {
         +int id
@@ -480,7 +484,7 @@ classDiagram
     
     User <|-- Masyarakat
     User <|-- Petugas
-    User <|-- Admin
+    %% User <|-- Admin - Commented out
     
     Masyarakat "1" --> "*" Pengaduan : membuat
     Petugas "1" --> "*" Pengaduan : menangani
@@ -496,10 +500,10 @@ classDiagram
 ## Penjelasan Diagram
 
 ### Use Case Diagram
-Menampilkan tiga aktor utama:
+Menampilkan dua aktor utama (Admin di-comment):
 - **Masyarakat**: Dapat mendaftar, login, membuat, melihat, update, dan hapus pengaduan
 - **Petugas**: Dapat login, mengelola, menanggapi, dan mengupdate status pengaduan
-- **Admin**: Dapat login, membuat laporan, mengelola pengguna dan kategori
+<!-- - **Admin**: Dapat login, membuat laporan, mengelola pengguna dan kategori - Commented out -->
 
 ### Activity Diagram
 Menggambarkan alur aktivitas spesifik untuk setiap role pengguna:
@@ -518,13 +522,13 @@ Menggambarkan alur aktivitas spesifik untuk setiap role pengguna:
 4. Membuat tanggapan untuk pengaduan selesai
 5. Mengelola pengaduan yang di-assign
 
-#### Activity Diagram - Admin:
+<!-- #### Activity Diagram - Admin (Commented out):
 1. Login dan melihat statistik sistem
 2. Mengelola pengguna (CRUD untuk Masyarakat, Petugas, Admin)
 3. Mengelola kategori pengaduan (CRUD)
 4. Mengelola dan assign pengaduan ke petugas
 5. Membuat laporan (by status, kategori, kinerja petugas)
-6. Melihat statistik detail dengan chart dan grafik
+6. Melihat statistik detail dengan chart dan grafik -->
 
 ### Sequence Diagram
 Menunjukkan interaksi antar komponen:
@@ -537,7 +541,7 @@ Menunjukkan interaksi antar komponen:
 
 ### Class Diagram
 Struktur data sistem meliputi:
-- User dan inheritance (Masyarakat, Petugas, Admin)
+- User dan inheritance (Masyarakat, Petugas) - Admin di-comment
 - Pengaduan sebagai entitas utama
 - Supporting entities (Kategori, FileBukti, Tanggapan, Rating, dll)
 - Relasi antar kelas dengan kardinalitas
