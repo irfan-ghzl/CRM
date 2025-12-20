@@ -8,7 +8,9 @@ import Dashboard from './pages/Dashboard';
 import PengaduanList from './pages/PengaduanList';
 import PengaduanForm from './pages/PengaduanForm';
 import PengaduanDetail from './pages/PengaduanDetail';
-import UserManagement from './pages/UserManagement';
+// === ADMIN IMPORTS - COMMENTED OUT ===
+// import UserManagement from './pages/UserManagement';
+// === END ADMIN IMPORTS ===
 import { authService } from './services';
 
 function PrivateRoute({ children }) {
@@ -16,12 +18,14 @@ function PrivateRoute({ children }) {
   return user ? children : <Navigate to="/login" />;
 }
 
-function AdminRoute({ children }) {
-  const user = authService.getCurrentUser();
-  if (!user) return <Navigate to="/login" />;
-  if (user.role !== 'admin') return <Navigate to="/" />;
-  return children;
-}
+// === ADMIN ROUTE - COMMENTED OUT ===
+// function AdminRoute({ children }) {
+//   const user = authService.getCurrentUser();
+//   if (!user) return <Navigate to="/login" />;
+//   if (user.role !== 'admin') return <Navigate to="/" />;
+//   return children;
+// }
+// === END ADMIN ROUTE ===
 
 function App() {
   return (
@@ -61,6 +65,7 @@ function App() {
             </PrivateRoute>
           }
         />
+        {/* === ADMIN ROUTE - COMMENTED OUT ===
         <Route
           path="/users"
           element={
@@ -69,6 +74,7 @@ function App() {
             </AdminRoute>
           }
         />
+        === END ADMIN ROUTE === */}
       </Routes>
     </Router>
   );

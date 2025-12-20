@@ -160,7 +160,8 @@ function PengaduanDetail() {
           </div>
         )}
 
-        {(user.role === 'admin' || user.role === 'petugas') && (
+        {/* === ADMIN CHECK REMOVED, only petugas can update status/create tanggapan === */}
+        {user.role === 'petugas' && (
           <>
             <div className="card">
               <h3>Update Status</h3>

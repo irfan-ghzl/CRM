@@ -135,18 +135,20 @@ const seedData = async () => {
   try {
     const bcrypt = require('bcryptjs');
     
+    // === ADMIN SEED DATA - COMMENTED OUT ===
     // Check and seed admin account
-    const adminCheck = await db.query("SELECT id FROM users WHERE username = 'admin'");
-    if (adminCheck.rows.length === 0) {
-      const hashedPasswordAdmin = await bcrypt.hash('admin123', 10);
-      
-      await db.query(`
-        INSERT INTO users (username, email, password, nama_lengkap, role)
-        VALUES ('admin', 'admin@crm.com', $1, 'Administrator', 'admin')
-      `, [hashedPasswordAdmin]);
-      
-      console.log('Admin account created');
-    }
+    // const adminCheck = await db.query("SELECT id FROM users WHERE username = 'admin'");
+    // if (adminCheck.rows.length === 0) {
+    //   const hashedPasswordAdmin = await bcrypt.hash('admin123', 10);
+    //   
+    //   await db.query(`
+    //     INSERT INTO users (username, email, password, nama_lengkap, role)
+    //     VALUES ('admin', 'admin@crm.com', $1, 'Administrator', 'admin')
+    //   `, [hashedPasswordAdmin]);
+    //   
+    //   console.log('Admin account created');
+    // }
+    // === END ADMIN SEED DATA ===
 
     // Check and seed petugas accounts
     const petugas1Check = await db.query("SELECT id FROM users WHERE username = 'petugas1'");

@@ -16,7 +16,8 @@ function Dashboard() {
 
   const loadStatistics = async () => {
     try {
-      if (user.role === 'admin' || user.role === 'petugas') {
+      // === ADMIN CHECK REMOVED, only petugas can see statistics ===
+      if (user.role === 'petugas') {
         const data = await pengaduanService.getStatistics();
         setStatistics(data);
       }
