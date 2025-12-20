@@ -27,7 +27,7 @@ function Login() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div className="card" style={{ width: '100%', maxWidth: '400px' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Login - Pengaduan Masyarakat</h2>
+        <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Pengaduan Masyarakat</h2>
         
         {error && <div className="error">{error}</div>}
         
