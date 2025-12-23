@@ -1,0 +1,63 @@
+version: '3.8'
+
+# Docker Compose for Staging Environment
+# Usage: docker-compose -f docker-compose.staging.yml up -d
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: crm-postgres-staging
+    environment:
+      POSTGRES_DB: ${DB_NAME:-crm_db}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Database password is required}
+    ports:
+      # Use non-standard port for security (map host 15432 to container 5432)
+      - "15432:5432"
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+    networks:
+      - crm-staging-network
+    restart: unless-stopped
+
+  backend:
+    image: ghcr.io/irfan-ghzl/crm/backend:latest
+    container_name: crm-backend-staging
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-crm_db}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:?Database password is required}
+      JWT_SECRET: ${JWT_SECRET:?JWT secret is required}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      PORT: 5000
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+    networks:
+      - crm-staging-network
+    command: sh -c "npm run migrate && npm start"
+    restart: unless-stopped
+
+  frontend:
+    image: ghcr.io/irfan-ghzl/crm/frontend:latest
+    container_name: crm-frontend-staging
+    environment:
+      REACT_APP_API_URL: ${API_URL:-http://localhost:5000/api}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - crm-staging-network
+    restart: unless-stopped
+
+volumes:
+  postgres_staging_data:
+
+networks:
+  crm-staging-network:
+    driver: bridge

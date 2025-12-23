@@ -296,6 +296,111 @@ Sistem menggunakan PostgreSQL dengan tabel-tabel berikut:
 3. **Sequence Diagram** - Interaksi antar komponen sistem
 4. **Class Diagram** - Struktur data dan relasi antar kelas
 
+## 🌐 Staging Deployment
+
+### Frontend (GitHub Pages)
+Aplikasi frontend secara otomatis di-deploy ke GitHub Pages sebagai staging environment ketika ada push ke branch `main`.
+
+- **URL Staging**: https://irfan-ghzl.github.io/CRM
+- **Workflow**: `.github/workflows/staging-deploy.yml`
+
+#### Setup GitHub Pages:
+1. Buka Settings repository > Pages
+2. Pilih "GitHub Actions" sebagai source
+
+### Backend & Database (Docker)
+Backend dan database menggunakan Docker images yang otomatis di-build dan push ke GitHub Container Registry (GHCR).
+
+#### Docker Images:
+- **Backend**: `ghcr.io/irfan-ghzl/crm/backend:latest`
+- **Frontend**: `ghcr.io/irfan-ghzl/crm/frontend:latest`
+
+#### Deploy ke Server Staging:
+
+1. **Login ke GHCR** (di server staging):
+```bash
+# Ganti YOUR_GITHUB_USERNAME dengan username GitHub Anda
+echo $GITHUB_TOKEN | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
+```
+
+2. **Setup environment variables**:
+```bash
+# Copy file template
+cp .env.staging.example .env.staging
+
+# Edit dengan nilai yang sesuai
+nano .env.staging
+```
+
+3. **Jalankan dengan Docker Compose Staging**:
+```bash
+docker-compose -f docker-compose.staging.yml --env-file .env.staging up -d
+```
+
+#### Koneksi Database di Staging:
+
+**Opsi 1: Database di Docker (Sudah termasuk)**
+- Database PostgreSQL sudah termasuk dalam `docker-compose.staging.yml`
+- Backend otomatis konek ke database via Docker network
+- Data disimpan di volume `postgres_staging_data`
+
+**Opsi 2: External Database (Railway, Supabase, Neon, dll)**
+1. Buat database di platform pilihan Anda
+2. Dapatkan connection string/credentials
+3. Update `.env.staging`:
+```env
+DB_HOST=your-external-db-host.railway.app
+DB_PORT=5432
+DB_NAME=crm_db
+DB_USER=your-db-user
+DB_PASSWORD=your-db-password
+```
+4. Comment/hapus service `postgres` di `docker-compose.staging.yml`
+
+**Koneksi Database Manual (untuk debugging)**:
+```bash
+# Via Docker
+docker exec -it crm-postgres-staging psql -U postgres -d crm_db
+
+# Via psql (jika terinstall) - port 15432 untuk staging
+psql -h localhost -p 15432 -U postgres -d crm_db
+```
+
+#### Deploy ke Cloud Platform:
+Docker images dapat di-deploy ke berbagai platform:
+- **Railway.app**: Import langsung dari GitHub (termasuk PostgreSQL gratis)
+- **Render.com**: Connect GitHub repository + PostgreSQL add-on
+- **DigitalOcean App Platform**: Deploy dari container registry
+- **AWS ECS/Fargate**: Push ke ECR atau gunakan GHCR
+- **Google Cloud Run**: Deploy container image + Cloud SQL
+
+#### Konfigurasi Environment Variables:
+Untuk staging/production, set environment variables berikut di server:
+
+**Backend**:
+```env
+NODE_ENV=production
+DB_HOST=your-postgres-host
+DB_PORT=5432
+DB_NAME=crm_db
+DB_USER=your-db-user
+# Gunakan password yang kuat (min 16 karakter, kombinasi huruf, angka, simbol)
+DB_PASSWORD=your-secure-password-here
+# Generate JWT secret dengan: openssl rand -base64 32
+JWT_SECRET=your-generated-jwt-secret
+JWT_EXPIRES_IN=7d
+PORT=5000
+```
+
+**Frontend**:
+```env
+REACT_APP_API_URL=https://your-backend-url/api
+```
+
+### GitHub Actions Variables:
+Konfigurasi di Settings > Secrets and variables > Actions:
+- `STAGING_API_URL`: URL backend API untuk frontend staging
+
 ## 🔒 Security
 
 - Password di-hash menggunakan bcryptjs
